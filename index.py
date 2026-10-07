@@ -1,3 +1,5 @@
+from flask import Flask, request
+
 from datetime import datetime, timedelta
 from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import OrderArgs, OrderType
@@ -7,6 +9,16 @@ host: str = "https://clob.polymarket.com"
 key: str = "fill in later" # private key
 chain_id: int = 137 # No need to adjust this
 POLYMARKET_PROXY_ADDRESS: str = '0xeD8E886aF055D45C876a73AEbD7E659F0AE69670' # This is the address listed below your profile picture when using the Polymarket site.
+
+@app.route("/", methods=["GET", "POST"])
+def request_router():
+    if request.method == "POST":
+        incoming_payload = request.get_json()
+        
+        return "Handled POST"
+    else:
+        # pass the verification
+        return request.args.get("hub.challenge", "default get request value returned")
 
 polymarkets_client = ClobClient(host, key=key, chain_id=chain_id, signature_type=2, funder=POLYMARKET_PROXY_ADDRESS)
 polymarkets_client.set_api_creds(polymarkets_client.create_or_derive_api_creds()) 
