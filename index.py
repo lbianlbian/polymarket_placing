@@ -1,8 +1,8 @@
 import os
 import asyncio
-from time import sleep
+import traceback
 
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from polymarket import AsyncSecureClient
 
 PRIVATE_KEY: str =  os.environ.get("PRIVATE_KEY")  # private key
@@ -19,13 +19,13 @@ async def place(clob_token_addr, price):
     response = await client.place_market_order(
         asset_id=clob_token_addr,
         side="BUY",
-        amount=round(TARGET_STAKE / price, POLYMARKET_AMOUNT_DECIMAL_PLACES) * price, 
+        amount=round(TARGET_STAKE / price, POLYMARKET_AMOUNT_DECIMAL_PLACES) * price,  # amount needs to be 2 decimal places
         max_price=price, 
     )
 
     check_counter = 0
-    while check_countyer < CHECK_RETRIES:
-        sleep(1)
+    while check_counter < CHECK_RETRIES:
+        await asyncio.sleep(1)
         page = await client.list_positions().first_page()
         position = next(
             (item for item in page.items if item.asset_id == clob_token_addr),
@@ -44,13 +44,20 @@ async def place(clob_token_addr, price):
         "success": False
     }
 
+app = Flask(__name__)
 @app.route("/", methods=["GET", "POST"])
 def request_router():
     if request.method == "POST":
         payload = request.get_json()
-        
-        return asyncio.run(
-            place(payload["clob_token_id"], payload["price"])
-        )
+        try:
+            response = asyncio.run(
+                place(payload["clob_token_id"], payload["price"])
+            )
+        except Exception as e:
+            response = {
+                "success": False,
+                "stack_trace": traceback.format_exc()
+            }
+        return jsonify(response)
     else:
         return "CALLED WITH GET REQUEST SOMEHOW"
