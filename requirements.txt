@@ -1,3 +1,2 @@
 flask
-requests
-py-clob-client
+polymarket-client
