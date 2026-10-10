@@ -53,7 +53,7 @@ def request_router():
             response = asyncio.run(
                 place(
                     payload["clob_token_id"], 
-                    round(payload["price"])  # price has to be 2 dec places
+                    round(payload["price"], 2)  # price has to be 2 dec places
                 )
             )
         except Exception as e:
