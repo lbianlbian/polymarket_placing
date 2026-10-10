@@ -9,6 +9,7 @@ PRIVATE_KEY: str =  os.environ.get("PRIVATE_KEY")  # private key
 POLYMARKET_PROXY_ADDRESS: str = '0xeD8E886aF055D45C876a73AEbD7E659F0AE69670' # This is the address listed below your profile picture when using the Polymarket site.
 TARGET_STAKE = 5
 POLYMARKET_AMOUNT_DECIMAL_PLACES = 2
+POLYMARKET_PRICE_DECIMAL_PLACES = 2
 CHECK_RETRIES = 3
 
 async def place(clob_token_addr, price):
@@ -53,7 +54,7 @@ def request_router():
             response = asyncio.run(
                 place(
                     payload["clob_token_id"], 
-                    round(payload["price"], 2)  # price has to be 2 dec places
+                    round(payload["price"], POLYMARKET_PRICE_DECIMAL_PLACES)  # price has to be 2 dec places
                 )
             )
         except Exception as e:
